@@ -1,0 +1,41 @@
+-- #学了那么久操作数据库，终于要学到增加这里了，crud嘿嘿
+
+-- USE sql_store;
+
+-- #其实create也不难，只需要这样
+-- #INSERT INTO后面接上你要操作的表
+-- -- INSERT INTO customers
+-- -- #然后使用VALUES去进行赋值
+-- -- #括号内我们要提供该表的列的数据，根据从上到下的顺序
+-- -- #因为我们的customer_id已开启AI，所以使用DEFAULT填默认值就行，填别的以后有可能会重复
+-- -- #后面就是NN的值需要填写，不是NN的值可以填NULL
+-- -- VALUES (
+-- -- 	DEFAULT,
+-- --     'John',
+-- --     'Smith',
+-- --     '1990-01-01',
+-- --     NULL,#DEFAULT也是一样的效果，因为我们扳手默认值也是NULL
+-- --     'address',
+-- --     'city',
+-- --     'CA',
+-- --     DEFAULT#NN的值也可以DEFAULT，只要它默认值不为NULL就行
+-- -- )
+
+-- #我们也可以使用指定写法
+-- #指定写法只需要在表后交个括号输入要操作的列就行
+
+-- INSERT INTO customers(
+-- 	first_name,
+--     last_name,
+--     address,
+--     city,
+--     state
+-- )
+-- #指定之后VALUES直接写入指定值
+-- VALUES (
+-- 	'John',
+--     'Smith',
+--     'address',
+--     'city',
+--     'CA'
+-- )
