@@ -1,0 +1,17 @@
+[ ] TASK-05  IOC 理解验证
+· Spring 是在什么时候创建这些对象的？
+
+答：没教。
+
+正确解答：
+应用启动的时候。你运行 main 方法，Spring 启动过程中会扫描所有加了 @Service、@Controller 等注解的类，
+统一创建对象放进容器里，这个过程叫"初始化容器"。不是你调接口的时候才创建，而是启动就创建好了，一直放在那里等你用。
+
+· 如果 NotificationService 没有加 @Service，会发生什么？
+
+答：不知道@Service干啥的
+
+正确解答：
+启动直接报错，项目跑不起来。错误信息大概是 NoSuchBeanDefinitionException，
+意思是 Spring 容器里找不到 NotificationService 这个对象。
+因为 OrderService 用 @Autowired 向容器要 NotificationService，但容器里根本没有，所以启动失败。

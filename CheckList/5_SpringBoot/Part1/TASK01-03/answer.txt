@@ -1,0 +1,21 @@
+TASK-01  从零创建项目
+· src/main/java 和 src/main/resources 各放什么？
+答：java里放我们写的主程序和后端，resources放我们写的前端
+
+正确解答：src/main/java 放 Java 源代码（Controller、Service、实体类等所有 .java 文件）。
+src/main/resources 放的不是前端，是资源配置文件，比如 application.yml、application.properties、静态资源（static/）、页面模板（templates/）。
+
+补充：前端在 SpringBoot 纯后端项目里根本不在这个工程里——你现在学的路线是前后端分离，前端是单独的 Vue 项目，跟这个工程没关系。
+
+· @SpringBootApplication 这个注解干了什么事？
+答：这个注解包含了三个注解
+
+正确解答：
+说了"包含三个注解"但没说是哪三个、各干什么，等于没答完。
+三个注解是：
+
+@SpringBootConfiguration — 标记这是一个配置类（等价于 @Configuration）
+@EnableAutoConfiguration — 开启自动配置，SpringBoot 根据你加的依赖自动帮你配好各种东西
+@ComponentScan — 扫描当前包及子包下所有加了注解的类，注册到 Spring 容器里
+
+其中最重要的是 @EnableAutoConfiguration，这是 SpringBoot "开箱即用"的核心，你加了 spring-boot-starter-web 它就自动配好 Tomcat 和 MVC，不需要你手动配。

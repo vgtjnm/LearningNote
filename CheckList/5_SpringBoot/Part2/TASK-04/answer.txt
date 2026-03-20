@@ -1,0 +1,21 @@
+[ ] TASK-04  三层架构拆分
+· 如果不用 @Autowired，自己 new ProductService() 有什么问题？
+
+答：自己new一个会报错
+
+正确解答：
+不是会报错，是功能会缺失。你自己 new 的对象 Spring 不知道它存在，后面加事务（@Transactional）、缓存（@Cacheable）这些注解全部失效，
+因为这些功能都是 Spring 通过代理对象来实现的。另外如果 ProductService 里还依赖其他 Bean，自己 new 的话那些依赖也不会被注入，直接空指针。
+
+· @Service 和 @Component 有什么区别？
+
+答：不知道
+
+正确解答：
+功能上没有区别，两个都是把类注册进 Spring 容器。区别只是语义：
+
+@Component 是通用标记，表示"这是一个 Spring 管理的组件"
+@Service 是专门给业务层用的，表示"这是一个 Service 类"
+类似的还有 @Repository（数据层）、@Controller（控制层）
+
+加不同注解是为了让代码可读性更好，让人一眼看出这个类是干什么的，底层实现是一样的。

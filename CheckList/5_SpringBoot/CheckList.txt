@@ -1,0 +1,155 @@
+╔══════════════════════════════════════════════════════════════════════╗
+║              🌱  SpringBoot 验收任务表                               ║
+║     不看教程，不看笔记，独立完成 — 能跑通才算真的学会                ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+  💡 使用说明：
+     用 Spring Initializr 新建项目作答，不复用任何已有代码。
+     每个任务用 Postman 或 curl 验证接口能正常返回。
+     卡住时只允许查官方文档，不允许看视频或笔记。
+     全部完成标准：能在简历上写「熟练使用 SpringBoot 开发 REST 接口」。
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  PART 1  项目结构 + 基础注解（热身）
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  [✅ ] TASK-01  从零创建项目
+      用 Spring Initializr（start.spring.io）创建一个 SpringBoot 项目，
+      依赖只选 Spring Web，成功启动后能在浏览器访问到报错页面
+      （Whitelabel Error Page），说明项目已跑起来。
+
+      完成后回答（写在纸上或注释里，不查资料）：
+      · src/main/java 和 src/main/resources 各放什么？
+      · @SpringBootApplication 这个注解干了什么事？
+
+
+  [✅ ] TASK-02  第一个接口
+      创建 HelloController，写一个 GET 接口 /hello，
+      接收请求参数 name（String），
+      返回字符串：「你好，[name]！欢迎使用 SpringBoot。」
+
+      用 Postman 调用 GET http://localhost:8080/hello?name=张三
+      返回正确结果才算过。
+
+
+  [✅ ] TASK-03  多种参数写法
+      在同一个 Controller 里写三个接口，分别演示三种传参方式：
+      · GET  /user/query?keyword=xxx       用 @RequestParam 接收
+      · GET  /user/1                       用 @PathVariable 接收 id
+      · POST /user/create                  用 @RequestBody 接收一个 UserDTO
+                                           （含 name 和 age 两个字段）
+
+      三个接口都只需把收到的参数原样返回（JSON 格式），
+      用 Postman 验证三个接口都能正常收到参数。
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  PART 2  三层架构 + IOC
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  [✅ ] TASK-04  三层架构拆分
+      实现一个「商品管理」模块，用 List<Product> 在内存中存储数据
+      （不需要数据库），包含以下接口：
+
+      GET    /products          返回所有商品列表
+      GET    /products/{id}     返回指定 id 的商品，找不到返回 null
+      POST   /products          新增商品（name + price）
+      DELETE /products/{id}     删除指定商品
+
+      强制要求分层：
+      · ProductController  只负责接收请求和返回响应，不写任何业务逻辑
+      · ProductService     负责所有业务逻辑（增删查）
+      · Product            是一个普通 Java 类（id / name / price）
+
+      @Autowired 注入 Service，不允许在 Controller 里 new ProductService()。
+
+      完成后回答：
+      · 如果不用 @Autowired，自己 new ProductService() 有什么问题？
+      · @Service 和 @Component 有什么区别？
+
+
+  [✅ ] TASK-05  IOC 理解验证
+      在项目里创建两个 Service：
+      · NotificationService  有一个方法 send(String message)，打印到控制台
+      · OrderService         依赖 NotificationService，有方法 placeOrder(String item)，
+                             调用 send() 发送「订单已创建：[item]」
+
+      在 Controller 里注入 OrderService，写接口 POST /order?item=xxx，
+      调用 placeOrder()。
+
+      完成后回答（不查资料）：
+      · Spring 是在什么时候创建这些对象的？
+      · 如果 NotificationService 没有加 @Service，会发生什么？
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  PART 3  配置文件
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  [ ] TASK-06  application.yml 配置读取
+      在 application.yml 里添加以下自定义配置：
+
+        app:
+          name: 我的商城
+          version: 1.0.0
+          max-product-count: 100
+
+      在 AppConfigService 里用 @Value 把这三个值注入为字段，
+      写接口 GET /config，返回这三个配置值（JSON 格式）。
+
+      然后在 application.yml 里把端口改成 9090，
+      重启后验证 http://localhost:9090/config 能正常访问。
+
+      完成后回答：
+      · @Value 和 @ConfigurationProperties 有什么区别，各适合什么场景？
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  PART 4  AOP 理解验证
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  [ ] TASK-07  手写一个 AOP 切面
+      为项目添加依赖 spring-boot-starter-aop，
+      创建 LoggingAspect 类，对所有 Controller 方法做环绕增强：
+      · 方法执行前打印：「[时间] 调用接口：[方法名]，参数：[参数值]」
+      · 方法执行后打印：「[时间] 接口返回：[返回值]，耗时：[x]ms」
+
+      调用任意接口，控制台能看到上面两行日志才算过。
+
+      完成后回答（不查资料）：
+      · AOP 底层是怎么"插入"到你的方法里去的（一句话描述原理）？
+      · 除了打日志，AOP 还能用在哪些场景？
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  PART 5  综合挑战 🏆
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  [ ] TASK-08  独立完成一个完整模块
+      从零新建项目，30 分钟内不查任何资料，
+      独立写出一个「待办事项（Todo）」管理接口，要求：
+
+      · GET    /todos           返回所有待办
+      · GET    /todos/{id}      返回指定待办
+      · POST   /todos           新增（title + done 字段）
+      · PUT    /todos/{id}      更新 title 或 done 状态
+      · DELETE /todos/{id}      删除
+
+      强制要求：
+      · 三层架构（Controller / Service / 实体类）
+      · @Autowired 注入
+      · 端口配置在 yml 里，改成 8088
+      · 有一个 AOP 切面记录每次接口调用
+
+      能用 Postman 把五个接口全部打通 = 真的学会了 SpringBoot 基础。
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  完成标准
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  TASK-01 ~ 07 全部打通 = SpringBoot 基础扎实，可以进入下一模块
+  TASK-08 在 30 分钟内独立完成 = 真正内化，不是「看过」
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
