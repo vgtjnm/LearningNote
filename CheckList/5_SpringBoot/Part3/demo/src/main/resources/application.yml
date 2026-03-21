@@ -1,0 +1,4 @@
+app:
+  name: "我的商城"
+  version: 1.0.0
+  max-product-count: 100

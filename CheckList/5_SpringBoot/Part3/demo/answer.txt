@@ -1,0 +1,28 @@
+TASK-06
+· @Value 和 @ConfigurationProperties 有什么区别，各适合什么场景？
+
+答：不知道
+
+正确解答：
+代码没问题，结构也清晰。
+
+现在回答题目要求的最后一问：
+
+---
+
+**`@Value` vs `@ConfigurationProperties` 的区别**
+
+|               | `@Value` | `@ConfigurationProperties` |
+| 用法       | 一个字段一个注解 | 整个类批量绑定 |
+| 适合场景      | 配置项少（1~3个） | 配置项多，有层级结构 |
+| 类型转换          | 基本支持 | 更强，支持 List、Map |
+| 代码可读性         | 分散 | 集中，一目了然 |
+
+---
+
+**直觉判断：**
+
+- 只需要1、2个值 → 用 `@Value`，简单直接
+- 配置项是一组相关的（比如你这个 `app.*`）→ 用 `@ConfigurationProperties` 更合适
+
+---
