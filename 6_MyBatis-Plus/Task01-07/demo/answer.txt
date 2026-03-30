@@ -1,0 +1,104 @@
+TASK-01  环境接入
+MyBatis-Plus 和原生 MyBatis 的区别是什么？
+
+答：没用过原生MyBatis不知道
+
+正确解答："没用过不知道"不是答案，这个要去查一下再回答。
+
+答：看了一篇阿里云上的文章，总的来说就是plus是加强版相比原生版本更加地高效和简洁了，
+MyBatis-Plus在MyBatis基础上内置了通用CRUD方法，简单操作不用写SQL，复杂查询还是可以回退到MyBatis的方式。
+
+application.yml 里 datasource 那几个字段各是什么意思？
+
+答：url是数据库地址，username是名字，password是密码，driver-class-name可能是使用时候的名字？
+
+正确解答：
+url、username、password答对了。driver-class-name 的理解不太准确，它的作用是告诉Spring Boot用哪个Driver类去连接数据库，
+因为市面上有MySQL、PostgreSQL、Oracle等不同数据库，每个数据库的Driver类名不一样，这里指定的就是MySQL的Driver类全路径。
+
+TASK-02 BaseMapper CRUD
+@TableName 和 @TableId 分别在什么情况下需要加？
+
+答：在一个项目需要持久化数据管理时，不能用static否则会乱
+
+正确解答：当你的类名和数据库表名不一致的时候加。
+
+MyBatis-Plus 的 insert() 执行后，id 是怎么回填到对象里的？
+
+答：不知道
+
+正确解答：MyBatis-Plus在insert执行完之后，会自动把数据库生成的id塞回你传进去的那个对象里。
+
+TASK-03  QueryWrapper 动态查询
+QueryWrapper 和 LambdaQueryWrapper 有什么区别，你更推荐用哪个？
+
+答：根据官方文档来看，QueryWrapper：专门用于构造查询条件，LambdaQueryWrapper：是一个基于 Lambda 表达式的查询条件构造器
+更推荐用LambdaQueryWrapper，因为它避免了硬编码字段名。这种方式提高了代码的可读性和可维护性，尤其是在字段名可能发生变化的情况下。
+
+正确解答：回答答到点上了，
+补充一点让你理解更深：
+QueryWrapper写的是"name"字符串，字段名写错了编译不报错，运行才炸。
+LambdaQueryWrapper写的是User::getName，字段名改了IDE直接报红，编译阶段就发现问题。
+所以实际项目里默认用LambdaQueryWrapper，QueryWrapper只在极少数Lambda写不了的特殊情况才用。
+
+TASK-04  @Select 注解写法
+#{age} 和 ${age} 有什么区别？哪个有 SQL 注入风险？
+
+答：不知道，啥是SQL注入风险？
+
+正确解答：
+先说SQL注入是什么：
+假设你有一个登录接口，SQL长这样：
+SELECT * FROM user WHERE name = '${name}'
+正常用户输入Jack，SQL变成：
+SELECT * FROM user WHERE name = 'Jack'
+但黑客输入' OR '1'='1，SQL变成：
+SELECT * FROM user WHERE name = '' OR '1'='1'
+'1'='1'永远为真，这条SQL会返回所有用户的数据，绕过了登录验证。这就是SQL注入。
+
+#{} 和 ${} 的区别：
+#{age} — MyBatis会用预编译处理，把参数当成纯数据传进去，SQL结构不会被破坏，安全。
+${age} — 直接字符串拼接，黑客可以通过参数改变SQL结构，有注入风险。
+
+结论：
+永远用#{}，${}只在极少数特殊场景用，比如动态传表名，而且那种情况要自己做参数校验。
+
+TASK-05  XML 写法
+什么情况下该用 @Select 注解，什么情况下该用 XML？
+
+答：不知道，没有项目经验
+
+正确解答：
+@Select注解：SQL简单、固定、一行能写完的时候用，比如SELECT * FROM user WHERE age > #{age}，直观方便。
+XML：SQL复杂的时候用，比如有多个动态条件、多表联查、SQL超过两三行的情况。
+XML里可以用<if>、<where>、<foreach>这些标签，写复杂逻辑比注解清晰得多。
+简单记：一行搞定用注解，复杂动态用XML。
+
+TASK-05.5  逻辑删除
+
+为什么实际项目里几乎不做物理删除？
+
+答：这个问题感觉不是程序员都能回答，有的数据就是不能彻底删除，要考虑恶意情况，
+比如说某个大主播的游戏账号被盗了开挂了被永久注销，你敢不给他恢复吗？
+
+正确解答：
+答到点子上了，数据恢复是核心原因。
+补充两个实际项目里更常见的理由：
+
+审计/追溯：订单、日志、操作记录这类数据，监管要求必须留存，物理删了违规。
+关联数据完整性：用户被删了，他的订单、评论还在，外键关联直接断掉，逻辑删除可以保持数据一致。
+
+TASK-06  基础分页
+
+不配置分页拦截器直接用 Page 会怎样？
+
+答：试过了，会直接不分页
+
+正确解答：对了
+
+前端通常需要分页接口返回哪些字段？
+
+答：可能他们只需要某个数据
+
+正确解答：总条数、总页数、当前页码、当前页数据列表。
+

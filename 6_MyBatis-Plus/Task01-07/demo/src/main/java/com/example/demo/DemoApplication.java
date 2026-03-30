@@ -1,14 +1,15 @@
 package com.example.demo;
 
+
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class Application {
-
+@MapperScan("com.example.demo")  // 加这行
+public class DemoApplication {
 	public static void main(String[] args) {
-		SpringApplication.run(Application.class, args);
+		SpringApplication.run(DemoApplication.class, args);
 	}
 
 }
