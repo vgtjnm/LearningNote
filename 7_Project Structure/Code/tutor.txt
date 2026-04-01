@@ -1,0 +1,227 @@
+好，完美。你有现成项目，直接在上面改造，学得最快。
+
+---
+
+## ③ 工程化结构 — 完整教学
+
+工程化结构解决的问题就一个：**代码放哪、怎么组织，让项目可维护、可扩展。**
+
+总共5个点，按顺序来：
+
+---
+
+### 第一步：项目分层规范
+
+现在你的项目里可能所有代码都堆在一起，规范的做法是这样分层：
+
+```
+src/main/java/com/yourname/项目名/
+├── controller/     ← 接收请求，调Service，返回结果
+├── service/        ← 业务逻辑（接口 + impl实现类）
+│   └── impl/
+├── mapper/         ← 数据库操作（MyBatis-Plus）
+├── entity/         ← 数据库表对应的实体类（PO）
+├── dto/            ← 接收前端传来的参数
+├── vo/             ← 返回给前端的数据
+└── common/         ← 公共工具（统一返回体、异常处理等）
+```
+
+**每层只做自己的事，不越界：**
+- Controller 不写 SQL，不写业务逻辑
+- Service 不写 HTTP 相关的东西
+- Mapper 只管数据库
+
+你现在项目的包结构是怎样的？先按这个把文件夹建好。
+
+---
+
+### 第二步：统一返回体
+
+现在你的接口可能直接 return 一个字符串或对象，前端拿到的格式不统一。要封装成这样：
+
+```json
+{
+  "code": 200,
+  "msg": "success",
+  "data": { ... }
+}
+```
+
+在 `common/` 下新建 `Result.java`：
+
+```java
+@Data
+public class Result<T> {
+    private Integer code;
+    private String msg;
+    private T data;
+
+    public static <T> Result<T> success(T data) {
+        Result<T> r = new Result<>();
+        r.code = 200;
+        r.msg = "success";
+        r.data = data;
+        return r;
+    }
+
+    public static <T> Result<T> fail(String msg) {
+        Result<T> r = new Result<>();
+        r.code = 500;
+        r.msg = msg;
+        r.data = null;
+        return r;
+    }
+}
+```
+
+然后你的 Controller 改成：
+
+```java
+@GetMapping("/user/{id}")
+public Result<User> getUser(@PathVariable Long id) {
+    User user = userService.getById(id);
+    return Result.success(user);
+}
+```
+
+---
+
+### 第三步：统一异常处理
+
+现在如果代码报错，SpringBoot 会返回一堆乱七八糟的错误页面，前端完全不知道发生了什么。
+
+在 `common/` 下新建两个文件：
+
+**1. 自定义业务异常 `BusinessException.java`：**
+
+```java
+public class BusinessException extends RuntimeException {
+    private Integer code;
+
+    public BusinessException(String msg) {
+        super(msg);
+        this.code = 500;
+    }
+
+    public BusinessException(Integer code, String msg) {
+        super(msg);
+        this.code = code;
+    }
+
+    public Integer getCode() {
+        return code;
+    }
+}
+```
+
+**2. 全局异常拦截器 `GlobalExceptionHandler.java`：**
+
+```java
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    // 捕获业务异常
+    @ExceptionHandler(BusinessException.class)
+    public Result<?> handleBusinessException(BusinessException e) {
+        return Result.fail(e.getMessage());
+    }
+
+    // 捕获其他所有异常（兜底）
+    @ExceptionHandler(Exception.class)
+    public Result<?> handleException(Exception e) {
+        return Result.fail("服务器内部错误：" + e.getMessage());
+    }
+}
+```
+
+以后在 Service 里任何地方抛异常都这样写：
+
+```java
+if (user == null) {
+    throw new BusinessException(404, "用户不存在");
+}
+```
+
+前端就能拿到规范的 JSON 错误信息，而不是一堆报错页面。
+
+---
+
+### 第四步：DTO 和 VO
+
+这两个是最容易搞混的，记住一句话：
+
+> **DTO 是入参（前端传给你），VO 是出参（你返回给前端）**，Entity 是数据库表的映射，三个不要混用。
+
+为什么要分开？举个例子：用户表有 `password` 字段，你不能直接把 Entity 返回给前端，要用 VO 把敏感字段去掉。
+
+```java
+// Entity — 对应数据库表
+@Data
+@TableName("user")
+public class User {
+    private Long id;
+    private String username;
+    private String password;  // 数据库有这个字段
+    private LocalDateTime createTime;
+}
+
+// DTO — 接收注册请求
+@Data
+public class UserRegisterDTO {
+    private String username;
+    private String password;
+}
+
+// VO — 返回给前端的用户信息
+@Data
+public class UserVO {
+    private Long id;
+    private String username;
+    // 没有 password！
+    private LocalDateTime createTime;
+}
+```
+
+---
+
+### 第五步：接入 Knife4j 接口文档
+
+Knife4j 是 Swagger 的增强版，接入后能自动生成接口文档，调试接口不用再手动用 Postman 一个个填。
+
+**pom.xml 加依赖：**
+
+```xml
+<dependency>
+    <groupId>com.github.xiaoymin</groupId>
+    <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+    <version>4.4.0</version>
+</dependency>
+```
+
+**application.yml 加配置：**
+
+```yaml
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+knife4j:
+  enable: true
+```
+
+启动项目后访问 `http://localhost:8080/doc.html`，就能看到所有接口列表，直接在上面测试。
+
+---
+
+## 总结
+
+| 点 | 作用 |
+|---|---|
+| 分层结构 | 代码职责清晰，不乱 |
+| 统一返回体 | 前端拿到的格式永远一致 |
+| 统一异常处理 | 报错有规范响应，不暴露堆栈 |
+| DTO/VO | 数据传输安全，不泄露敏感字段 |
+| Knife4j | 接口文档自动生成，调试方便 |
+
+---
+
+**现在可以开始动手了：** 先把你项目的包结构按分层规范整理好，然后把 `Result.java` 和 `GlobalExceptionHandler.java` 加进去，遇到问题随时问我。
