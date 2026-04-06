@@ -49,6 +49,8 @@ public class JwtService {
     public boolean isTokenValid(String token, UserDetails userDetails){
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+        //username.equals(userDetails.getUsername()) — 验证用户名是否匹配
+        //!isTokenExpired(token) — 验证 token 有没有过期
     }
 
     private boolean isTokenExpired(String token) {
@@ -66,11 +68,23 @@ public class JwtService {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+        //提取JWT里Payload那一段的所有内容，也就是Claims
+        //解析 JWT 的时候，需要用密钥去验证签名，确认这个 token 没有被篡改过。
+        //.setSigningKey(getSignInKey()) 就是把密钥传进去，解析器拿着这个密钥去验签，验签通过才能拿到里面的内容，验签失败直接抛异常。
     }
 
     private Key getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
     }
+
+    //SECRET_KEY 是密钥，不是 Payload，跟 Payload 没关系。
+    //原因是这样的：加密算法（HS256）需要的输入是字节数组，不是字符串。
+    //SECRET_KEY 这个字符串是用 Base64 编码过的，先 decode 拿到原始字节数组，再交给 Keys.hmacShaKeyFor() 生成真正的密钥对象。
+    //简单说：算法要字节，不要字符串，所以要先解码。
+
+    //总结一下 JwtService 两个主要功能：
+    //generateToken — 生成 token
+    //isTokenValid — 验证 token
 
 }

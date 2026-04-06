@@ -26,6 +26,8 @@ public class ApplicationConfig {
     public UserDetailsService userDetailsService() {
         return username -> repository.findByEmail(username)
                 .orElseThrow(()-> new UsernameNotFoundException("User not found"));
+        //orElseThrow = 查到了就返回，查不到就抛出异常。
+        //throw 在 Java 里就是抛出异常的意思，这里抛的是 UsernameNotFoundException("User not found")，告诉 Security 这个用户不存在。
     }
 
     @Bean
@@ -34,6 +36,9 @@ public class ApplicationConfig {
         authProvider.setUserDetailsService(userDetailsService());
         authProvider.setPasswordEncoder(passwordEndcoder());
         return authProvider;
+        //它把两件事组合在一起：
+        //setUserDetailsService — 告诉它怎么根据用户名查用户
+        //setPasswordEncoder — 告诉它密码用什么方式加密的
     }
 
     @Bean
