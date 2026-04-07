@@ -1,0 +1,19 @@
+Session 的工作方式：
+
+用户登录，服务端验证通过
+服务端创建一个 Session，存在服务器内存（或 Redis）里，里面有用户信息
+服务端把 SessionID 返回给客户端，存在 Cookie 里
+后续每次请求，客户端自动带上 Cookie，服务端拿 SessionID 去查 Session
+
+服务端需要存： Session 数据本身（用户信息）
+
+Token 的工作方式：
+
+用户登录，服务端验证通过
+服务端生成一个 Token（把用户信息加密/签名打包进去），返回给客户端
+客户端自己存 Token（localStorage 或 Header）
+后续每次请求，客户端手动带上 Token，服务端直接解析 Token 拿用户信息
+
+服务端需要存： 什么都不用存
+
+这就是核心区别：Session 状态在服务端，Token 状态在客户端。
