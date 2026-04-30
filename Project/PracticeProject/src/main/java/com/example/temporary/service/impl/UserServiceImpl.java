@@ -1,9 +1,12 @@
 package com.example.temporary.service.impl;
 
 import com.example.temporary.common.BusinessException;
+import com.example.temporary.dto.UserCreateDTO;
+import com.example.temporary.dto.UserUpdateDTO;
 import com.example.temporary.mapper.UserMapper;
 import com.example.temporary.service.UserService;
 import com.example.temporary.entity.User;
+import com.example.temporary.vo.UserReadVO;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
@@ -44,26 +47,30 @@ public class UserServiceImpl implements UserService {
     //🔥 把“外面传进来的 mapper”赋值给“我自己内部的 mapper”
 
     @Override
-    public void create(User user){
+    public Long create(UserCreateDTO user){
 
         if (user == null || user.getUsername() == null || user.getUsername().trim().isEmpty()) {
             throw new BusinessException(400, "用户名不能为空");
         }
 
-        user.setId(null);
-        user.setCreateTime(LocalDateTime.now());
+        User userR = new User();
+        userR.setUsername(user.getUsername());
+        userR.setPassword(user.getPassword());
+        userR.setCreateTime(LocalDateTime.now());
 
         try{
-            userMapper.insert(user);
+            userMapper.insert(userR);
         }
         catch (DuplicateKeyException e){
             throw new BusinessException(409,"用户已存在");
         }
 
+        return userR.getId();
+
     }
 
     @Override
-    public User read(Long id){
+    public UserReadVO read(Long id){
 
         if(id <= 0)
             throw new BusinessException(400,"id错误");
@@ -82,18 +89,28 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(404,"用户不存在");
         }
 
-        return user;
+        UserReadVO users = new UserReadVO();
+
+        users.setId(user.getId());
+        users.setUsername(user.getUsername());
+        users.setCreateTime(user.getCreateTime());
+
+        return users;
 
     }
 
     @Override
-    public void update(User user){
+    public void update(UserUpdateDTO user){
 
-        if (user == null || user.getUsername() == null || user.getUsername().trim().isEmpty()) {
-            throw new BusinessException(400, "用户名不能为空");
+        if (user == null ||user.getId() == null || user.getUsername() == null || user.getUsername().trim().isEmpty()) {
+            throw new BusinessException(400, "用户信息不能为空");
         }
 
-        int rows = userMapper.updateById(user);
+        User updateEntity = new User();
+        updateEntity.setId(user.getId());
+        updateEntity.setUsername(user.getUsername());
+        updateEntity.setPassword(user.getPassword());
+        int rows = userMapper.updateById(updateEntity);
 
         if(rows <= 0){
             throw new BusinessException(400,"用户修改失败");
@@ -103,6 +120,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void delete(Long id){
+
+        if(id==null)
+            throw new BusinessException(400,"id不能为空");
 
         if(id<=0)
             throw new BusinessException(400,"id错误");

@@ -16,4 +16,9 @@ public class AllException {
         return ResultUtils.error(500,e.getMessage());
     }
 
+    //🔴 区别本质：
+    //写法	含义
+    //<T> Result<T>	定义泛型方法
+    //Result<T>	使用已有的 T
+
 }
